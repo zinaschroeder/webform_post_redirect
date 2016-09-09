@@ -1,0 +1,222 @@
+<?php
+
+    /**
+     * Implements hook_permission().
+     */
+    function webform_post_redirect_permission() {
+        return array(
+            'configure post redirect' => array(
+                'title' => t('Configure POST redirect on webforms.'),
+                'description' => t('Allows access to POST options for custom redirects on webforms.'),
+            ),
+        );
+    }
+
+    /**
+     * Implements hook_form_alter()
+     *
+     * Adds additional option to post values with a redirect
+     */
+    function webform_post_redirect_form_alter(&$form, $form_state, $form_id) {
+        
+        if ($form_id == 'webform_configure_form') {
+
+            // Add script to hide or show POST redirect elements when they are not relevant
+            drupal_add_js(drupal_get_path('module', 'webform_post_redirect') . '/js/webform_post_redirect-admin.js');
+
+            // Get page node
+            $node = node_load($form['#node']->nid);
+
+            // Load previously saved post data if available
+            $post = webform_post_redirect_load($node->nid);
+
+            // Format included components into array if exists
+            if ($post['included_components']) {
+                if (strpos($post['included_components'], ', ') !== false) {
+                    $included_components = explode(', ', $post['included_components']);
+                } else {
+                    $included_components = array($post['included_components']);
+                }
+            } else { 
+                $included_components = array_keys($node->webform['components']);
+            }
+
+            // Add extra validate and submit functions
+            $form['#validate'][] = 'webform_post_redirect_form_validate';
+            $form['#submit'][] = 'webform_post_redirect_form_submit';
+
+            // Checkbox
+            $form['submission']['redirection']['redirect_post'] = array(
+                '#type' => 'checkbox',
+                '#title' => t('Include POST data from submission when redirecting user?'),
+                '#default_value' => $post['status'],
+                '#parents' => array('redirect_post'),
+            );
+
+            // Component list
+            $form['submission']['redirection']['components'] = array(
+                '#type' => 'select',
+                '#title' => t('Included POST values'),
+                '#options' => webform_component_list($node),
+                '#default_value' => $included_components,
+                '#multiple' => TRUE,
+                '#size' => 10,
+                '#description' => t('The selected components will be included data sent via POST along with the user to the redirect location.'),
+                '#process' => array('webform_component_select'),
+            );
+
+            // Exlude empty option
+            $form['submission']['redirection']['components']['suffix']['exclude_empty'] = array(
+                '#type' => 'checkbox',
+                '#title' => t('Exclude empty components'),
+                '#default_value' => $post['exclude_empty'],
+            );
+
+            if (!user_access('configure post redirect')) {
+                $form['submission']['redirection']['components']['suffix']['exclude_empty']['#access'] = FALSE;
+                $form['submission']['redirection']['components']['#access'] = FALSE;
+                $form['submission']['redirection']['redirect_post']['#access'] = FALSE;
+            }
+        }
+
+    }
+
+    /**
+     * Adding additional validation actions for the webform configure form
+     */
+    function webform_post_redirect_form_validate($form, &$form_state) {
+
+        $values = $form_state['values'];
+
+        // Check that POST redirect checkbox is checked
+        if ($values['redirect_post'] == 1) {
+
+            $component_is_selected = false;
+            $index = 1;
+
+            // Loop through components and make sure one is selected
+            while (!$component_is_selected && $index <= count($values['components'])) {
+                
+                // Test if it is selected
+                if ($values['components'][$index] != 0) {
+                    $component_is_selected = true;
+                }
+
+                $index++;
+            }
+
+            // If no components are selected, show error
+            if (!$component_is_selected) {
+                form_set_error('components', t('You must select at least one component to POST.'));
+            }
+        }
+    }
+
+    /**
+     * Adding additional submit actions for the webform configure form
+     */
+    function webform_post_redirect_form_submit($form, &$form_state) {
+
+        $nid = $form['#node']->nid;
+
+        // Get comma separated list of values from checkbox associative array
+        $included_components = implode(', ', array_filter(array_values($form_state['values']['components'])));
+
+        // Create array for the database record
+        $record = array(
+            'nid' => $nid,
+            'included_components' => $included_components,
+            'exclude_empty' => $form_state['values']['exclude_empty'],
+            'status' => $form_state['values']['redirect_post']
+        );
+
+        // Check if there is a row associated with this node already
+        $exists = db_select('webform_post_redirects', 'p')
+                    ->fields('p', array('nid'))
+                    ->condition('nid', $nid, "=")
+                    ->execute()
+                    ->fetchAssoc();
+
+        // Update or insert row depending on if one exists for this node already
+        if ($exists) {
+            $success = db_update('webform_post_redirects')
+                        ->condition('nid', $nid, "=");
+        } else {
+            $success = db_insert('webform_post_redirects');
+        }
+
+        $success->fields($record)
+                ->execute();
+
+        // Log error
+        if ($success === FALSE) {
+            watchdog('webform_post_redirect', 'There was an error writing a new POST redirect to the database.', array(), WATCHDOG_ERROR);
+        }
+    }
+
+    /**
+     * Load a POST redirect array from table row
+     */
+    function webform_post_redirect_load($nid) {
+        $post = db_select('webform_post_redirects', 'p')
+                    ->fields('p')
+                    ->condition('nid', $nid, '=')
+                    ->execute()
+                    ->fetchAssoc();
+
+        // If nothing is in DB, return an empty array with the same structure
+        if (empty($post)) {
+            $post = array(
+                'pid' => NULL,
+                'included_components' => array(),
+                'exclude_empty' => NULL,
+                'status' => NULL
+            );
+        }
+
+        return $post;
+    }
+
+    /**
+     * Implements hook_webform_submission_insert().
+     *
+     * Respond to a Webform submission being inserted.
+     *
+     * Note that this hook is called after a submission has already been saved to
+     * the database.
+     *
+     * This is the start of the process to redirect a user with their submission
+     * data stored in a POST request.
+     */
+    function webform_post_redirect_webform_submission_insert($node, $submission) {
+
+        global $base_url;
+
+        $post = webform_post_redirect_load($node->nid);
+
+        if ($post['status'] == 1) {
+            watchdog('webform_post_redirect', t('POST redirect enabled for ' . $node->title . '. Redirecting user.'));
+            header('Location: ' . $base_url . '/node/' . $node->nid . '/redirect/' . $submission->sid);
+            die();
+        }
+    }
+
+    /**
+     * Implements hook_menu().
+     */
+    function webform_post_redirect_menu() {
+        $items = array();
+
+        $items['node/%/redirect/%'] = array(
+            'title' => 'Redirecting',
+            'page callback' => 'webform_post_redirect_page',
+            'page arguments' => array(1, 3),
+            'access callback' => TRUE,
+            'file' => 'includes/webform_post_redirect.pages.inc',
+            'type' => MENU_CALLBACK,
+        );
+
+        return $items;
+    }
+
+    
