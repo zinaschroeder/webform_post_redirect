@@ -1,6 +1,11 @@
 <?php
 
     /**
+     * @file
+     *     Webform Post Redirect module.
+     */
+
+    /**
      * Implements hook_permission().
      */
     function webform_post_redirect_permission() {
@@ -22,7 +27,8 @@
         if ($form_id == 'webform_configure_form') {
 
             // Add script to hide or show POST redirect elements when they are not relevant
-            drupal_add_js(drupal_get_path('module', 'webform_post_redirect') . '/js/webform_post_redirect-admin.js');
+            drupal_add_js(drupal_get_path('module', 'webform_post_redirect') 
+                    . '/js/webform_post_redirect-admin.js');
 
             // Get page node
             $node = node_load($form['#node']->nid);
@@ -32,12 +38,14 @@
 
             // Format included components into array if exists
             if ($post['included_components']) {
-                if (strpos($post['included_components'], ', ') !== false) {
+                if (strpos($post['included_components'], ', ') !== FALSE) {
                     $included_components = explode(', ', $post['included_components']);
-                } else {
+                } 
+                else {
                     $included_components = array($post['included_components']);
                 }
-            } else { 
+            } 
+            else { 
                 $included_components = array_keys($node->webform['components']);
             }
 
@@ -47,28 +55,29 @@
 
             // Checkbox
             $form['submission']['redirection']['redirect_post'] = array(
-                '#type' => 'checkbox',
-                '#title' => t('Include POST data from submission when redirecting user?'),
+                '#type'          => 'checkbox',
+                '#title'         => t('Include POST data from submission when redirecting user?'),
                 '#default_value' => $post['status'],
-                '#parents' => array('redirect_post'),
+                '#parents'       => array('redirect_post'),
             );
 
             // Component list
             $form['submission']['redirection']['components'] = array(
-                '#type' => 'select',
-                '#title' => t('Included POST values'),
-                '#options' => webform_component_list($node),
+                '#type'          => 'select',
+                '#title'         => t('Included POST values'),
+                '#options'       => webform_component_list($node),
                 '#default_value' => $included_components,
-                '#multiple' => TRUE,
-                '#size' => 10,
-                '#description' => t('The selected components will be included data sent via POST along with the user to the redirect location.'),
-                '#process' => array('webform_component_select'),
+                '#multiple'      => TRUE,
+                '#size'          => 10,
+                '#description'   => t('The selected components will be included data 
+                        sent via POST along with the user to the redirect location.'),
+                '#process'       => array('webform_component_select'),
             );
 
             // Exlude empty option
             $form['submission']['redirection']['components']['suffix']['exclude_empty'] = array(
-                '#type' => 'checkbox',
-                '#title' => t('Exclude empty components'),
+                '#type'          => 'checkbox',
+                '#title'         => t('Exclude empty components'),
                 '#default_value' => $post['exclude_empty'],
             );
 
@@ -91,7 +100,7 @@
         // Check that POST redirect checkbox is checked
         if ($values['redirect_post'] == 1) {
 
-            $component_is_selected = false;
+            $component_is_selected = FALSE;
             $index = 1;
 
             // Loop through components and make sure one is selected
@@ -99,7 +108,7 @@
                 
                 // Test if it is selected
                 if ($values['components'][$index] != 0) {
-                    $component_is_selected = true;
+                    $component_is_selected = TRUE;
                 }
 
                 $index++;
@@ -141,7 +150,8 @@
         if ($exists) {
             $success = db_update('webform_post_redirects')
                         ->condition('nid', $nid, "=");
-        } else {
+        } 
+        else {
             $success = db_insert('webform_post_redirects');
         }
 
@@ -195,7 +205,8 @@
         $post = webform_post_redirect_load($node->nid);
 
         if ($post['status'] == 1) {
-            watchdog('webform_post_redirect', t('POST redirect enabled for ' . $node->title . '. Redirecting user.'));
+            watchdog('webform_post_redirect', 'POST redirect enabled for ' 
+                    . $node->title . '. Redirecting user.');
             header('Location: ' . $base_url . '/node/' . $node->nid . '/redirect/' . $submission->sid);
             die();
         }

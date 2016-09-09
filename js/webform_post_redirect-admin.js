@@ -6,11 +6,11 @@
 jQuery(document).ready(function($){
 
     // Start in correct toggle display
-    togglePostRedirectElement($('#edit-redirect input:checked').val(), 'url', '.form-item-redirect-post');
-    togglePostRedirectElement($('#edit-redirect-post').is(':checked'), true, '#edit-components.webform-component-select-table');
+    toggle_post_redirect_element($('#edit-redirect input:checked').val(), 'url', '.form-item-redirect-post');
+    toggle_post_redirect_element($('#edit-redirect-post').is(':checked'), true, '#edit-components.webform-component-select-table');
 
     // When the radio changes, check if the checkbox and components should be hidden
-    $('#edit-redirect input').on('change', function() {
+    $('#edit-redirect input[type=radio]').on('change', function() {
 
         if ($(this).val() == 'url') {
             $('.form-item-redirect-post').show();
@@ -28,11 +28,11 @@ jQuery(document).ready(function($){
 
     // When the checkbox changes, check if components should be hidden
     $('#edit-redirect-post').on('change', function() {
-        togglePostRedirectElement($(this).is(':checked'), true, '#edit-components.webform-component-select-table');
+        toggle_post_redirect_element($(this).is(':checked'), true, '#edit-components.webform-component-select-table');
     });
 
     // Trigger display of element based on trigger and truth case
-    function togglePostRedirectElement(trigger, showCase, element) {
+    function toggle_post_redirect_element(trigger, showCase, element) {
         switch(trigger) {
             case showCase:
                 $(element).show();
