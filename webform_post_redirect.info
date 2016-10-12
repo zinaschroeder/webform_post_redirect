@@ -1,0 +1,6 @@
+name = Webform Post Redirect
+description = Redirect a user to a URL after submitting a webform and include their submission data as POST values.    
+core = 7.x
+dependencies[] = webform
+package = Webform
+
