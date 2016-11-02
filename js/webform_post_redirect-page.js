@@ -5,10 +5,10 @@
 
 jQuery(document).ready(function($){
 
-    function submit_form() {
-        document.getElementById('post_redirect_form').submit();
-    }
+  function submit_form() {
+    document.getElementById('post_redirect_form').submit();
+  }
 
-    window.onload = submit_form;
+  window.onload = submit_form;
 
 });
