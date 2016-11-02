@@ -38,46 +38,47 @@
 
       // Format included components into array if exists
       if ($post['included_components']) {
+        
         if (strpos($post['included_components'], ', ') !== FALSE) {
           $included_components = explode(', ', $post['included_components']);
-        } 
-        else {
+        
+        } else {
           $included_components = array($post['included_components']);
         }
-      } 
-      else { 
+      
+      } else { 
         $included_components = array_keys($node->webform['components']);
       }
 
       // Add extra validate and submit functions
       $form['#validate'][] = 'webform_post_redirect_form_validate';
-      $form['#submit'][] = 'webform_post_redirect_form_submit';
+      $form['#submit'][]   = 'webform_post_redirect_form_submit';
 
       // Checkbox
       $form['submission']['redirection']['redirect_post'] = array(
-        '#type'      => 'checkbox',
-        '#title'     => t('Include POST data from submission when redirecting user?'),
+        '#type'          => 'checkbox',
+        '#title'         => t('Include POST data from submission when redirecting user?'),
         '#default_value' => $post['status'],
-        '#parents'     => array('redirect_post'),
+        '#parents'       => array('redirect_post'),
       );
 
       // Component list
       $form['submission']['redirection']['components'] = array(
-        '#type'      => 'select',
-        '#title'     => t('Included POST values'),
-        '#options'     => webform_component_list($node),
+        '#type'          => 'select',
+        '#title'         => t('Included POST values'),
+        '#options'       => webform_component_list($node),
         '#default_value' => $included_components,
-        '#multiple'    => TRUE,
-        '#size'      => 10,
+        '#multiple'      => TRUE,
+        '#size'          => 10,
         '#description'   => t('The selected components will be included data 
-            sent via POST along with the user to the redirect location.'),
-        '#process'     => array('webform_component_select'),
+                             sent via POST along with the user to the redirect location.'),
+        '#process'       => array('webform_component_select'),
       );
 
       // Exlude empty option
       $form['submission']['redirection']['components']['suffix']['exclude_empty'] = array(
-        '#type'      => 'checkbox',
-        '#title'     => t('Exclude empty components'),
+        '#type'          => 'checkbox',
+        '#title'         => t('Exclude empty components'),
         '#default_value' => $post['exclude_empty'],
       );
 
@@ -141,22 +142,21 @@
 
     // Check if there is a row associated with this node already
     $exists = db_select('webform_post_redirects', 'p')
-          ->fields('p', array('nid'))
-          ->condition('nid', $nid, "=")
-          ->execute()
-          ->fetchAssoc();
+        ->fields('p', array('nid'))
+        ->condition('nid', $nid, "=")
+        ->execute()
+        ->fetchAssoc();
 
     // Update or insert row depending on if one exists for this node already
     if ($exists) {
       $success = db_update('webform_post_redirects')
-            ->condition('nid', $nid, "=");
-    } 
-    else {
+          ->condition('nid', $nid, "=");
+    } else {
       $success = db_insert('webform_post_redirects');
     }
 
     $success->fields($record)
-        ->execute();
+       ->execute();
 
     // Log error
     if ($success === FALSE) {
