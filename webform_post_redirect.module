@@ -62,11 +62,24 @@
         '#parents'       => array('redirect_post'),
       );
 
+      // Array of components to ignore because they don't contain useful data to pass along
+      $excluded_components = array('file', 'fieldset', 'markup', 'pagebreak');
+
+      // Get all of the components of this form except those in the excluded list
+      $result = db_select('webform_component', 'wc')
+          ->fields('wc', array('cid', 'name'))
+          ->condition('wc.nid', $node->nid, '=')
+          ->condition('wc.type', $excluded_components, 'NOT IN')
+          ->orderby('weight', 'ASC')
+          ->execute();
+
+      $components = $result->fetchAllKeyed(0, 1);
+
       // Component list
       $form['submission']['redirection']['components'] = array(
         '#type'          => 'select',
         '#title'         => t('Included POST values'),
-        '#options'       => webform_component_list($node),
+        '#options'       => $components,
         '#default_value' => $included_components,
         '#multiple'      => TRUE,
         '#size'          => 10,
