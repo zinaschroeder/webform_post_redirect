@@ -13,13 +13,13 @@
     global $base_url;
 
     // Add forced form submission redirect script
-    drupal_add_js(drupal_get_path('module', 'webform_post_redirect') 
+    drupal_add_js(drupal_get_path('module', 'webform_post_redirect')
         . '/js/webform_post_redirect-page.js');
 
-    // Basic page content 
-    $output = '<h1>Redirecting</h1><img src="' . $base_url . '/' 
-        . drupal_get_path('module', 'webform_post_redirect') 
-        . '/images/loading.gif" class="centered" /><br/><p>If your browser does 
+    // Basic page content
+    $output = '<h1>Redirecting</h1><img src="' . $base_url . '/'
+        . drupal_get_path('module', 'webform_post_redirect')
+        . '/images/loading.gif" class="centered" /><br/><p>If your browser does
         not automatically redirect you in 5 seconds, please click the button below.</p>'; // TODO add admin interface to customize page content
 
     // Get hidden form

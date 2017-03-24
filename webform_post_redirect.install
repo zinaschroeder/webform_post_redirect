@@ -12,7 +12,7 @@ function webform_post_redirect_schema() {
   $schema = array();
 
   $schema['webform_post_redirects'] = array(
-    'description' => 'Holds information regarding what data should be sent via POST with the 
+    'description' => 'Holds information regarding what data should be sent via POST with the
                       user to the confirmation redirect after submitting a webform',
     'fields' => array(
       'nid' => array(
@@ -23,7 +23,7 @@ function webform_post_redirect_schema() {
         'default'     => 0,
       ),
       'included_components' => array(
-        'description' => 'A list of components that will be included in the POST data. 
+        'description' => 'A list of components that will be included in the POST data.
                           A list of CIDs separated by commas.',
         'type'        => 'text',
         'not null'    => TRUE,
@@ -47,7 +47,6 @@ function webform_post_redirect_schema() {
     ),
     'primary key' => array('nid'),
   );
-
 
   return $schema;
 }
