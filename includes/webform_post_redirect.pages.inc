@@ -48,8 +48,8 @@
 
     if (strpos($post['included_components'], ', ') !== FALSE) {
       $included_components = explode(', ', $post['included_components']);
-    } 
-    else {
+
+    } else {
       $included_components = array($post['included_components']);
     }
 
@@ -60,10 +60,25 @@
     // Create hidden input for each included component
     foreach ($included_components as $component) {
 
-      $value = array_shift($submission->data[$component]);
+      // Check that component value exists
+      if (!empty($submission->data[$component])) {
 
-      // That value isn't empty or make sure that empty fields are not exluded
+        // If component has multiple values, pass them along as JSON data
+        if (is_array($submission->data[$component]) && sizeof($submission->data[$component]) > 1) {
+          $value = json_encode($submission->data[$component]);
+
+        } else {
+          $value = array_shift($submission->data[$component]);
+        }
+
+      } else {
+        $value = "";
+      }
+
+      // That value isn't empty or make sure that empty fields are not excluded
       if (!empty($value) || $post['exclude_empty'] == 0) {
+
+        // Create hidden form element to pass on field value
         $form[$components[$component]['form_key']] = array(
           '#type'  => 'hidden',
           '#value' => $value,
