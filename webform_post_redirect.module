@@ -118,14 +118,13 @@
       $index = 1;
 
       // Loop through components and make sure one is selected
-      while (!$component_is_selected && $index <= count($values['components'])) {
-        
-        // Test if it is selected
-        if ($values['components'][$index] != 0) {
-          $component_is_selected = TRUE;
-        }
+      foreach ($values['components'] as $component) {
 
-        $index++;
+        // Test if it is selected
+        if ($component != 0) {
+          $component_is_selected = TRUE;
+          break;
+        }
       }
 
       // If no components are selected, show error
