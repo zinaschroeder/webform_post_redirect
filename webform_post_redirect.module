@@ -39,12 +39,7 @@
       // Format included components into array if exists
       if ($post['included_components']) {
 
-        if (strpos($post['included_components'], ', ') !== FALSE) {
-          $included_components = explode(', ', $post['included_components']);
-
-        } else {
-          $included_components = array($post['included_components']);
-        }
+        $included_components = webform_post_redirect_component_array($post['included_components']);
 
       } else {
         $included_components = array_keys($node->webform['components']);
@@ -250,21 +245,14 @@
 
     $data = webform_post_redirect_load($component['nid']);
 
-    if (!empty($data['status'])) {
-      $included_components = explode(', ', $data['included_components']);
+    if (!empty($data['included_components'])) {
 
-      if (is_array($included_components)) {
-        $index = array_search($component['cid'], $included_components);
+      $included_components = webform_post_redirect_component_array($data['included_components']);
 
-        // remove from array
-        unset($included_components[$index]);
+      $index = array_search($component['cid'], $included_components);
 
-      } else {
-
-        if ($included_components == $component['cid']) {
-          unset($included_components);
-        }
-      }
+      // remove from array
+      unset($included_components[$index]);
 
       // If no components left, just remove the record
       if (!empty($included_components)) {
@@ -283,4 +271,22 @@
           ->execute();
       }
     }
+  }
+
+  /**
+   * Converts string of components into array
+   *
+   * @param String $components    A comma separated list of components IDs
+   * @return Array of components IDs
+   */
+  function webform_post_redirect_component_array($components) {
+
+    if (strpos($components, ', ') !== FALSE) {
+      $included_components = explode(', ', $components);
+
+    } else {
+      $included_components = array($components);
+    }
+
+    return $included_components;
   }
