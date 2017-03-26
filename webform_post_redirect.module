@@ -57,18 +57,8 @@
         '#parents'       => array('redirect_post'),
       );
 
-      // Array of components to ignore because they don't contain useful data to pass along
-      $excluded_components = webform_post_redirect_excluded_components();
-
       // Get all of the components of this form except those in the excluded list
-      $result = db_select('webform_component', 'wc')
-          ->fields('wc', array('cid', 'name'))
-          ->condition('wc.nid', $node->nid, '=')
-          ->condition('wc.type', $excluded_components, 'NOT IN')
-          ->orderby('weight', 'ASC')
-          ->execute();
-
-      $components = $result->fetchAllKeyed(0, 1);
+      $components = webform_post_redirect_get_form_components($node->nid);
 
       // Component list
       $form['submission']['redirection']['components'] = array(
@@ -309,4 +299,22 @@
     drupal_alter('webform_post_redirect_excluded_components', $excluded_components);
 
     return $excluded_components;
+  }
+
+  /**
+   * This function provides an array of components available to send via POST
+   * for a specific webform node.
+   *
+   * @param int  $nid  ID of webform node
+   * @return Associative array of component IDs and component names
+   */
+  function webform_post_redirect_get_form_components($nid) {
+    $result = db_select('webform_component', 'wc')
+        ->fields('wc', array('cid', 'name'))
+        ->condition('wc.nid', $nid, '=')
+        ->condition('wc.type', webform_post_redirect_excluded_components(), 'NOT IN')
+        ->orderby('weight', 'ASC')
+        ->execute();
+
+    return $result->fetchAllKeyed(0, 1);
   }
