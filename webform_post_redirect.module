@@ -242,3 +242,45 @@
 
     return $items;
   }
+
+ /**
+  * Implements hook_webform_component_delete().
+  */
+  function webform_post_redirect_webform_component_delete($component) {
+
+    $data = webform_post_redirect_load($component['nid']);
+
+    if (!empty($data['status'])) {
+      $included_components = explode(', ', $data['included_components']);
+
+      if (is_array($included_components)) {
+        $index = array_search($component['cid'], $included_components);
+
+        // remove from array
+        unset($included_components[$index]);
+
+      } else {
+
+        if ($included_components == $component['cid']) {
+          unset($included_components);
+        }
+      }
+
+      // If no components left, just remove the record
+      if (!empty($included_components)) {
+
+        $included_components = implode(', ', $included_components);
+
+        db_update('webform_post_redirects')
+          ->condition('nid', $component['nid'], '=')
+          ->fields(array('included_components' => $included_components))
+          ->execute();
+
+      } else {
+        // Delete a record in a 3rd-party module table when a component is deleted.
+        db_delete('webform_post_redirects')
+          ->condition('nid', $component['nid'], '=')
+          ->execute();
+      }
+    }
+  }
