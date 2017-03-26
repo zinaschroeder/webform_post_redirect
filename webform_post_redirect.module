@@ -130,35 +130,21 @@
     // Get comma separated list of values from checkbox associative array
     $included_components = implode(', ', array_filter(array_values($form_state['values']['components'])));
 
-    // Create array for the database record
-    $record = array(
-      'nid' => $nid,
-      'included_components' => $included_components,
-      'exclude_empty' => $form_state['values']['exclude_empty'],
-      'status' => $form_state['values']['redirect_post']
-    );
-
-    // Check if there is a row associated with this node already
-    $exists = db_select('webform_post_redirects', 'p')
-        ->fields('p', array('nid'))
-        ->condition('nid', $nid, "=")
-        ->execute()
-        ->fetchAssoc();
-
     // Update or insert row depending on if one exists for this node already
-    if ($exists) {
-      $success = db_update('webform_post_redirects')
-          ->condition('nid', $nid, "=");
+    if (webform_post_redirect_check_record_exists($nid)) {
+      webform_post_redirect_update_components($nid, array('included_components' => $included_components));
+
     } else {
-      $success = db_insert('webform_post_redirects');
-    }
 
-    $success->fields($record)
-       ->execute();
+      // Create array for the database record
+      $fields = array(
+        'nid' => $nid,
+        'included_components' => $included_components,
+        'exclude_empty' => $form_state['values']['exclude_empty'],
+        'status' => $form_state['values']['redirect_post']
+      );
 
-    // Log error
-    if ($success === FALSE) {
-      watchdog('webform_post_redirect', 'There was an error writing a new POST redirect to the database.', array(), WATCHDOG_ERROR);
+      webform_post_redirect_insert_components($nid, $fields);
     }
   }
 
@@ -250,10 +236,7 @@
 
         $included_components = implode(', ', $included_components);
 
-        db_update('webform_post_redirects')
-          ->condition('nid', $component['nid'], '=')
-          ->fields(array('included_components' => $included_components))
-          ->execute();
+        webform_post_redirect_update_components($component['nid'], array('included_components' => $included_components));
 
       } else {
 
@@ -317,6 +300,44 @@
         ->execute();
 
     return $result->fetchAllKeyed(0, 1);
+  }
+
+  /**
+   * This function updates the component list for a post redirect record
+   *
+   * @param int              $nid         ID of webform node
+   * @param associate array  $components  Array of columns and values to update
+   */
+  function webform_post_redirect_update_components($nid, $fields) {
+    $success = db_update('webform_post_redirects')
+        ->condition('nid', $nid, '=')
+        ->fields($fields)
+        ->execute();
+
+    // Log error
+    if ($success === FALSE) {
+      drupal_set_message(t('An error occurred while trying to update the POST redirect setting.'), 'error');
+      watchdog('webform_post_redirect', 'An error occurred while trying to update the POST redirect setting.', array(), WATCHDOG_ERROR);
+    }
+  }
+
+  /**
+   * This function creates a new post redirect record
+   *
+   * @param int              $nid         ID of webform node
+   * @param associate array  $components  Array of columns and values to insert
+   */
+  function webform_post_redirect_insert_components($nid, $fields) {
+    $success = db_insert('webform_post_redirects')
+        ->fields($fields)
+        ->execute();
+
+    // Log error
+    if ($success === FALSE) {
+      drupal_set_message(t('An error occurred while writing a new POST redirect to the database.'), 'error');
+      watchdog('webform_post_redirect', 'An error occurred while writing a new POST redirect to the database.', array(), WATCHDOG_ERROR);
+    }
+  }
 
   /**
    * This function removes a post redirect record
@@ -337,4 +358,24 @@
       watchdog('webform_post_redirect', "The POST redirect setting for node $nid has been removed.", array(), WATCHDOG_ERROR);
     }
   }
+
+  /**
+   * This function checks if a post redirect record exists for this node
+   *
+   * @param int  $nid  ID of webform node
+   * @return A boolean value for if the record exists
+   */
+  function webform_post_redirect_check_record_exists($nid) {
+
+    $count = db_select('webform_post_redirects', 'p')
+        ->condition('nid', $nid, "=")
+        ->addExpression('COUNT(*)')
+        ->execute()
+        ->fetchField();
+
+    if ($count > 0) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
   }
