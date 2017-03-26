@@ -58,7 +58,7 @@
       );
 
       // Array of components to ignore because they don't contain useful data to pass along
-      $excluded_components = array('file', 'fieldset', 'markup', 'pagebreak');
+      $excluded_components = webform_post_redirect_excluded_components();
 
       // Get all of the components of this form except those in the excluded list
       $result = db_select('webform_component', 'wc')
@@ -289,4 +289,24 @@
     }
 
     return $included_components;
+  }
+
+  /**
+   * This function provides an array of default components to exclude from the Post Redirect
+   * options beause they don't work well via post or have no data to send
+   *
+   * This function calls hook_excluded_components_alter to allow developers to
+   * restrict more component types if needed.
+   *
+   * @return Array of excluded components name strings
+   */
+  function webform_post_redirect_excluded_components() {
+
+    // Default list of components that
+    $excluded_components = array('file', 'fieldset', 'markup', 'pagebreak');
+
+    // Calling all modules implementing hook_excluded_components_alter():
+    drupal_alter('webform_post_redirect_excluded_components', $excluded_components);
+
+    return $excluded_components;
   }
