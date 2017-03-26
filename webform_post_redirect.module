@@ -255,10 +255,9 @@
           ->execute();
 
       } else {
-        // Delete a record in a 3rd-party module table when a component is deleted.
-        db_delete('webform_post_redirects')
-          ->condition('nid', $component['nid'], '=')
-          ->execute();
+
+        // Remove redirect record
+        webform_post_redirect_remove_record($component['nid']);
       }
     }
   }
@@ -317,4 +316,24 @@
         ->execute();
 
     return $result->fetchAllKeyed(0, 1);
+
+  /**
+   * This function removes a post redirect record
+   *
+   * @param int  $nid  ID of webform node
+   */
+  function webform_post_redirect_remove_record($nid) {
+    $success = db_delete('webform_post_redirects')
+        ->condition('nid', $nid, '=')
+        ->execute();
+
+    // Log error
+    if ($success === FALSE) {
+      drupal_set_message(t('An error occurred while trying to remove the POST redirect setting.'), 'error');
+      watchdog('webform_post_redirect', 'An error occurred while trying to remove the POST redirect setting.', array(), WATCHDOG_ERROR);
+
+    } else {
+      watchdog('webform_post_redirect', "The POST redirect setting for node $nid has been removed.", array(), WATCHDOG_ERROR);
+    }
+  }
   }
