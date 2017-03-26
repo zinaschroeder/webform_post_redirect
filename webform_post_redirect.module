@@ -166,23 +166,23 @@
    * Load a POST redirect array from table row
    */
   function webform_post_redirect_load($nid) {
-    $post = db_select('webform_post_redirects', 'p')
+    $redirect = db_select('webform_post_redirects', 'p')
         ->fields('p')
         ->condition('nid', $nid, '=')
         ->execute()
         ->fetchAssoc();
 
     // If nothing is in DB, return an empty array with the same structure
-    if (empty($post)) {
-      $post = array(
-        'pid' => NULL,
+    if (empty($redirect)) {
+      $redirect = array(
+        'nid' => NULL,
         'included_components' => array(),
         'exclude_empty' => NULL,
         'status' => NULL
       );
     }
 
-    return $post;
+    return $redirect;
   }
 
   /**
@@ -237,6 +237,7 @@
 
     if (!empty($data['included_components'])) {
 
+      // convert to array
       $included_components = webform_post_redirect_component_array($data['included_components']);
 
       $index = array_search($component['cid'], $included_components);
