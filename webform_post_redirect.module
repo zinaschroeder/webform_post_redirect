@@ -34,12 +34,12 @@
       $node = node_load($form['#node']->nid);
 
       // Load previously saved post data if available
-      $post = webform_post_redirect_load($node->nid);
+      $redirect = webform_post_redirect_load($node->nid);
 
       // Format included components into array if exists
-      if ($post['included_components']) {
+      if ($redirect['included_components']) {
 
-        $included_components = webform_post_redirect_component_array($post['included_components']);
+        $included_components = webform_post_redirect_component_array($redirect['included_components']);
 
       } else {
         $included_components = array_keys($node->webform['components']);
@@ -53,14 +53,14 @@
       $form['submission']['redirection']['redirect_post'] = array(
         '#type'          => 'checkbox',
         '#title'         => t('Include POST data from submission when redirecting user?'),
-        '#default_value' => $post['status'],
+        '#default_value' => $redirect['status'],
         '#parents'       => array('redirect_post'),
       );
 
       // Get all of the components of this form except those in the excluded list
       $components = webform_post_redirect_get_form_components($node->nid);
 
-      // Component list
+      // Component list field
       $form['submission']['redirection']['components'] = array(
         '#type'          => 'select',
         '#title'         => t('Included POST values'),
@@ -73,11 +73,11 @@
         '#process'       => array('webform_component_select'),
       );
 
-      // Exlude empty option
+      // Exclude empty option field
       $form['submission']['redirection']['components']['suffix']['exclude_empty'] = array(
         '#type'          => 'checkbox',
         '#title'         => t('Exclude empty components'),
-        '#default_value' => $post['exclude_empty'],
+        '#default_value' => $redirect['exclude_empty'],
       );
 
       // Only allow users with permission to access these options
@@ -186,9 +186,9 @@
 
     global $base_url;
 
-    $post = webform_post_redirect_load($node->nid);
+    $redirect = webform_post_redirect_load($node->nid);
 
-    if ($post['status'] == 1) {
+    if ($redirect['status'] == 1) {
       watchdog('webform_post_redirect', 'POST redirect enabled for '
           . $node->title . '. Redirecting user.');
       header('Location: ' . $base_url . '/node/' . $node->nid . '/redirect/' . $submission->sid);

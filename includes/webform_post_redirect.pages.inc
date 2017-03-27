@@ -34,17 +34,17 @@
     include_once(drupal_get_path('module', 'webform') . "/includes/webform.submissions.inc");
 
     $node       = node_load($nid);
-    $post       = webform_post_redirect_load($nid);
+    $redirect   = webform_post_redirect_load($nid);
     $submission = webform_get_submission($nid, $sid);
 
     $redirect_url = $node->webform['redirect_url'];
     $components   = $node->webform['components'];
 
-    if (strpos($post['included_components'], ', ') !== FALSE) {
-      $included_components = explode(', ', $post['included_components']);
+    if (strpos($redirect['included_components'], ', ') !== FALSE) {
+      $included_components = explode(', ', $redirect['included_components']);
 
     } else {
-      $included_components = array($post['included_components']);
+      $included_components = array($redirect['included_components']);
     }
 
     $form['#id']     = 'post_redirect_form';
@@ -70,7 +70,7 @@
       }
 
       // That value isn't empty or make sure that empty fields are not excluded
-      if (!empty($value) || $post['exclude_empty'] == 0) {
+      if (!empty($value) || $redirect['exclude_empty'] == 0) {
 
         // Create hidden form element to pass on field value
         $form[$components[$component]['form_key']] = array(
