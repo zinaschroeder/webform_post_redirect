@@ -12,22 +12,16 @@
 
     global $base_url;
 
-    // Add forced form submission redirect script
-    drupal_add_js(drupal_get_path('module', 'webform_post_redirect')
-        . '/js/webform_post_redirect-page.js');
+    $page = array(
+      '#theme' => 'webform_post_redirect_page',
+      '#header' => t('Redirecting'),
+      '#message' => t('If your browser does not automatically redirect you in 5 seconds, please click the button below.'),
+      '#form' => drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid),
+    );
 
-    // Basic page content
-    $output = '<h1>Redirecting</h1><img src="' . $base_url . '/'
-        . drupal_get_path('module', 'webform_post_redirect')
-        . '/images/loading.gif" class="centered" /><br/><p>If your browser does
-        not automatically redirect you in 5 seconds, please click the button below.</p>'; // TODO add admin interface to customize page content
+    $page['#attached']['js'][] = array('data' => drupal_get_path('module', 'webform_post_redirect') . '/js/webform_post_redirect-page.js');
 
-    // Get hidden form
-    $form = drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid);
-
-    $output .= drupal_render($form);
-
-    return $output;
+    return $page;
   }
 
   /**
@@ -88,7 +82,7 @@
 
     $form['submit_button'] = array(
       '#type'       => 'button',
-      '#value'      => 'Redirect Now', // TODO add admin interface to customize button text
+      '#value'      => t('Redirect Now'), // TODO add admin interface to customize button text
       '#attributes' => array(
         'class' => array('centered')
       ),

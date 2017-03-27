@@ -379,3 +379,18 @@
       return FALSE;
     }
   }
+
+  /**
+   * Implements hook_theme().
+   */
+  function webform_post_redirect_theme() {
+
+    $module_path = drupal_get_path('module', 'webform_post_redirect');
+
+    return array(
+      'webform_post_redirect_page' => array(
+        'variables' => array('form' => NULL, 'header' => NULL, 'message' => NULL),
+        'template' => 'templates/webform-post-redirect-page',
+      ),
+    );
+  }
