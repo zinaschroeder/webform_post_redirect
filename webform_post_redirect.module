@@ -369,7 +369,7 @@
 
     $count = db_select('webform_post_redirects', 'p')
         ->condition('nid', $nid, "=")
-        ->addExpression('COUNT(*)')
+        ->countQuery()
         ->execute()
         ->fetchField();
 
