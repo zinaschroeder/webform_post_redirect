@@ -80,11 +80,49 @@
         '#default_value' => $redirect['exclude_empty'],
       );
 
+      // Redirect Page Settings fieldset
+      $form['submission']['redirection']['page_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Redirect Page Settings'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      // Multivalue field format option field
+      $form['submission']['redirection']['page_settings']['multivalue'] = array(
+        '#type'          => 'radios',
+        '#title'         => t('Multivalue Field Format'),
+        '#options'       => array('json' => t('JSON'), 'serialize' => t('PHP Serialization')),
+        '#default_value' => 'json',
+      );
+
+      // Header text field
+      $form['submission']['redirection']['page_settings']['header'] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('Header'),
+        '#default_value' => 'Redirecting',
+      );
+
+      // Page text field
+      $form['submission']['redirection']['page_settings']['message'] = array(
+        '#type'          => 'textarea',
+        '#title'         => t('Page Text'),
+        '#default_value' => 'If your browser does not automatically redirect you in 5 seconds, please click the button below.',
+      );
+
+      // Page text field
+      $form['submission']['redirection']['page_settings']['button_text'] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('Redirect Button Text'),
+        '#default_value' => 'Redirect Now',
+      );
+
       // Only allow users with permission to access these options
       if (!user_access('configure post redirect')) {
         $form['submission']['redirection']['components']['suffix']['exclude_empty']['#access'] = FALSE;
         $form['submission']['redirection']['components']['#access'] = FALSE;
         $form['submission']['redirection']['redirect_post']['#access'] = FALSE;
+        $form['submission']['redirection']['page_settings']['#access'] = FALSE;
       }
     }
 
