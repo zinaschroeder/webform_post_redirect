@@ -1,66 +1,108 @@
 <?php
 
-/**
- * @file
- *   Webform Post Redirect module install/schema hooks.
- */
+  /**
+   * @file
+   *   Webform Post Redirect module install/schema hooks.
+   */
 
-/**
- * Implements hook_schema().
- */
-function webform_post_redirect_schema() {
-  $schema = array();
+  /**
+   * Implements hook_schema().
+   */
+  function webform_post_redirect_schema() {
+    $schema = array();
 
-  $schema['webform_post_redirects'] = array(
-    'description' => 'Holds information regarding what data should be sent via POST with the
-                      user to the confirmation redirect after submitting a webform',
-    'fields' => array(
-      'nid' => array(
-        'description' => 'The node identifier of a webform.',
-        'type'        => 'int',
-        'unsigned'    => TRUE,
-        'not null'    => TRUE,
-        'default'     => 0,
+    $schema['webform_post_redirects'] = array(
+      'description' => 'Holds information regarding what data should be sent via POST with the
+                        user to the confirmation redirect after submitting a webform',
+      'fields' => array(
+        'nid' => array(
+          'description' => 'The node identifier of a webform.',
+          'type'        => 'int',
+          'unsigned'    => TRUE,
+          'not null'    => TRUE,
+          'default'     => 0,
+        ),
+        'included_components' => array(
+          'description' => 'A list of components that will be included in the POST data.
+                            A list of CIDs separated by commas.',
+          'type'        => 'text',
+          'not null'    => TRUE,
+        ),
+        'exclude_empty' => array(
+          'description' => 'Determines if the POST data will include component with an empty value.',
+          'type'        => 'int',
+          'unsigned'    => TRUE,
+          'size'        => 'tiny',
+          'not null'    => TRUE,
+          'default'     => 0,
+        ),
+        'status' => array(
+          'description' => 'Whether this POST redirect is enabled.',
+          'type'        => 'int',
+          'unsigned'    => TRUE,
+          'size'        => 'tiny',
+          'not null'    => TRUE,
+          'default'     => 1,
+        ),
       ),
-      'included_components' => array(
-        'description' => 'A list of components that will be included in the POST data.
-                          A list of CIDs separated by commas.',
-        'type'        => 'text',
-        'not null'    => TRUE,
-      ),
-      'exclude_empty' => array(
-        'description' => 'Determines if the POST data will include component with an empty value.',
-        'type'        => 'int',
-        'unsigned'    => TRUE,
-        'size'        => 'tiny',
-        'not null'    => TRUE,
-        'default'     => 0,
-      ),
-      'status' => array(
-        'description' => 'Whether this POST redirect is enabled.',
-        'type'        => 'int',
-        'unsigned'    => TRUE,
-        'size'        => 'tiny',
-        'not null'    => TRUE,
-        'default'     => 1,
-      ),
-    ),
-    'primary key' => array('nid'),
-  );
+      'primary key' => array('nid'),
+    );
 
-  return $schema;
-}
+    return $schema;
+  }
 
-/**
- * Implements hook_install().
- */
-function webform_post_redirect_install() {
-  drupal_install_schema('webform_post_redirects');
-}
+  /**
+   * Implements hook_install().
+   */
+  function webform_post_redirect_install() {
+    drupal_install_schema('webform_post_redirects');
+  }
 
-/**
- * Implements hook_uninstall().
- */
-function webform_post_redirect_uninstall() {
-  drupal_uninstall_schema('webform_post_redirects');
-}
+  /**
+   * Implements hook_uninstall().
+   */
+  function webform_post_redirect_uninstall() {
+    drupal_uninstall_schema('webform_post_redirects');
+  }
+
+  /**
+   * Adds page customization fields to webform_post_redirects table
+   */
+  function webform_post_redirect_update_7000() {
+
+     $fields = array(
+      'multivalue_format' => array(
+        'description' => 'Multivalue Field Format',
+        'type' => 'varchar',
+        'length' => '20',
+        'not null' => FALSE,
+      ),
+      'header' => array(
+        'description' => 'Header Text',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => 'Redirecting',
+      ),
+      'message' => array(
+        'description' => 'Page Text',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => FALSE,
+      ),
+      'button_text' => array(
+        'description' => 'Button Text',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+        'default' => 'Redirect Now',
+      ),
+    );
+
+    // Add each fielf to table
+    foreach ($fields as $key => $field)  {
+      if (!db_field_exists('webform_post_redirects', $key)) {
+        db_add_field('webform_post_redirects', $key, $field);
+      }
+    }
+  }
