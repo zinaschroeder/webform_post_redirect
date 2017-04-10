@@ -52,20 +52,6 @@
   }
 
   /**
-   * Implements hook_install().
-   */
-  function webform_post_redirect_install() {
-    drupal_install_schema('webform_post_redirects');
-  }
-
-  /**
-   * Implements hook_uninstall().
-   */
-  function webform_post_redirect_uninstall() {
-    drupal_uninstall_schema('webform_post_redirects');
-  }
-
-  /**
    * Adds page customization fields to webform_post_redirects table
    */
   function webform_post_redirect_update_7000() {
