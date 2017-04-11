@@ -93,10 +93,10 @@
 
       // Redirect Page Settings fieldset
       $form['submission']['redirection']['page_settings'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Redirect Page Settings'),
+        '#type'        => 'fieldset',
+        '#title'       => t('Redirect Page Settings'),
         '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
+        '#collapsed'   => TRUE,
       );
 
       // Page Title text field
@@ -175,17 +175,17 @@
     // Get comma separated list of values from checkbox associative array
     $included_components = implode(', ', array_filter(array_values($form_state['values']['components'])));
 
-      // Create array for the database record
-      $fields = array(
-        'included_components' => $included_components,
-        'exclude_empty' => $form_state['values']['exclude_empty'],
-        'status'              => $form_state['values']['redirect_post'],
-        'multivalue_format'   => $form_state['values']['multivalue'],
-        'page_title'          => $form_state['values']['page_title'],
-        'message'             => $form_state['values']['message']['value'],
-        'message_format'      => $form_state['values']['message']['format'],
-        'button_text'         => $form_state['values']['button_text'],
-      );
+    // Create array for the database record
+    $fields = array(
+      'included_components' => $included_components,
+      'exclude_empty'       => $form_state['values']['exclude_empty'],
+      'status'              => $form_state['values']['redirect_post'],
+      'multivalue_format'   => $form_state['values']['multivalue'],
+      'page_title'          => $form_state['values']['page_title'],
+      'message'             => $form_state['values']['message']['value'],
+      'message_format'      => $form_state['values']['message']['format'],
+      'button_text'         => $form_state['values']['button_text'],
+    );
 
     // Update or insert row depending on if one exists for this node already
     if (webform_post_redirect_check_record_exists($nid)) {
@@ -214,9 +214,9 @@
     // If nothing is in DB, return an empty array with the same structure
     if (empty($redirect)) {
       $redirect = array(
-        'nid' => NULL,
+        'nid'                 => NULL,
         'included_components' => array(),
-        'exclude_empty' => NULL,
+        'exclude_empty'       => NULL,
         'status'              => NULL,
         'multivalue_format'   => 'json',
         'page_title'          => NULL,
@@ -261,12 +261,12 @@
     $items = array();
 
     $items['node/%/redirect/%'] = array(
-      'title' => 'Redirecting',
-      'page callback' => 'webform_post_redirect_page',
-      'page arguments' => array(1, 3),
+      'title'           => 'Redirecting',
+      'page callback'   => 'webform_post_redirect_page',
+      'page arguments'  => array(1, 3),
       'access callback' => TRUE,
-      'file' => 'includes/webform_post_redirect.pages.inc',
-      'type' => MENU_CALLBACK,
+      'file'            => 'includes/webform_post_redirect.pages.inc',
+      'type'            => MENU_CALLBACK,
     );
 
     return $items;
