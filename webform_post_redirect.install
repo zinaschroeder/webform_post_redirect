@@ -44,6 +44,38 @@
           'not null'    => TRUE,
           'default'     => 1,
         ),
+        'multivalue_format' => array(
+          'description' => 'Multivalue Field Format',
+          'type' => 'varchar',
+          'length' => '20',
+          'not null' => TRUE,
+          'default' => 'json',
+        ),
+        'page_title' => array(
+          'description' => 'Redirect Page Title',
+          'type' => 'varchar',
+          'length' => '255',
+          'not null' => FALSE,
+          'default' => 'Redirecting',
+        ),
+        'message' => array(
+          'description' => 'Page Text',
+          'type' => 'text',
+          'size' => 'normal',
+          'not null' => FALSE,
+        ),
+        'message_format' => array(
+          'description' => 'The {filter_format}.format of the redirect page message.',
+          'type' => 'varchar',
+          'length' => 255,
+        ),
+        'button_text' => array(
+          'description' => 'Button Text',
+          'type' => 'varchar',
+          'length' => '255',
+          'not null' => TRUE,
+          'default' => 'Redirect Now',
+        ),
       ),
       'primary key' => array('nid'),
     );
@@ -61,10 +93,11 @@
         'description' => 'Multivalue Field Format',
         'type' => 'varchar',
         'length' => '20',
-        'not null' => FALSE,
+        'not null' => TRUE,
+        'default' => 'json',
       ),
-      'header' => array(
-        'description' => 'Header Text',
+      'page_title' => array(
+        'description' => 'Redirect page title',
         'type' => 'varchar',
         'length' => '255',
         'not null' => FALSE,
@@ -76,11 +109,16 @@
         'size' => 'normal',
         'not null' => FALSE,
       ),
+      'message_format' => array(
+        'description' => 'The {filter_format}.format of the redirect page message.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
       'button_text' => array(
         'description' => 'Button Text',
         'type' => 'varchar',
         'length' => '255',
-        'not null' => FALSE,
+        'not null' => TRUE,
         'default' => 'Redirect Now',
       ),
     );
