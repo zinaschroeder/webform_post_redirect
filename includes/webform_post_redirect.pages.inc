@@ -15,10 +15,13 @@
     $redirect = webform_post_redirect_load($nid);
     $defaults = webform_post_redirect_get_page_defaults();
 
+    // Set message to default if blank
+    $message  = t(!empty($redirect['message']) ? $redirect['message'] : '<p>' . $defaults['message'] . '<p>');
+
     $page = array(
       '#theme'      => 'webform_post_redirect_page',
       '#page_title' => t(!empty($redirect['page_title']) ? $redirect['page_title'] : $defaults['page_title']),
-      '#message'    => '<p>' . t(!empty($redirect['message']) ? $redirect['message'] : $defaults['message']) . '<p>',
+      '#message'    => check_markup($message, $redirect['message_format']),
       '#form'       => drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid),
     );
 
