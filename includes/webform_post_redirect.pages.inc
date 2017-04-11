@@ -59,7 +59,18 @@
 
         // If component has multiple values, pass them along as JSON data
         if (is_array($submission->data[$component]) && sizeof($submission->data[$component]) > 1) {
+
+          switch ($redirect['multivalue_format']) {
+
+            case 'serialize':
+              $value = serialize($submission->data[$component]);
+              break;
+
+            case 'json':
+            default:
           $value = json_encode($submission->data[$component]);
+              break;
+          }
 
         } else {
           $value = array_shift($submission->data[$component]);
