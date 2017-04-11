@@ -12,11 +12,14 @@
 
     global $base_url;
 
+    $redirect = webform_post_redirect_load($nid);
+    $defaults = webform_post_redirect_get_page_defaults();
+
     $page = array(
-      '#theme' => 'webform_post_redirect_page',
-      '#header' => t('Redirecting'),
-      '#message' => t('If your browser does not automatically redirect you in 5 seconds, please click the button below.'),
-      '#form' => drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid),
+      '#theme'      => 'webform_post_redirect_page',
+      '#page_title' => t(!empty($redirect['page_title']) ? $redirect['page_title'] : $defaults['page_title']),
+      '#message'    => t(!empty($redirect['message']) ? $redirect['message'] : $defaults['message']),
+      '#form'       => drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid),
     );
 
     $page['#attached']['js'][] = array('data' => drupal_get_path('module', 'webform_post_redirect') . '/js/webform_post_redirect-page.js');
@@ -36,6 +39,7 @@
     $node       = node_load($nid);
     $redirect   = webform_post_redirect_load($nid);
     $submission = webform_get_submission($nid, $sid);
+    $defaults   = webform_post_redirect_get_page_defaults();
 
     $redirect_url = $node->webform['redirect_url'];
     $components   = $node->webform['components'];
@@ -68,7 +72,7 @@
 
             case 'json':
             default:
-          $value = json_encode($submission->data[$component]);
+              $value = json_encode($submission->data[$component]);
               break;
           }
 
@@ -93,7 +97,7 @@
 
     $form['submit_button'] = array(
       '#type'       => 'button',
-      '#value'      => t('Redirect Now'), // TODO add admin interface to customize button text
+      '#value'      => t(!empty($redirect['button_text']) ? $redirect['button_text'] : $defaults['button_text']),
       '#attributes' => array(
         'class' => array('centered')
       ),
