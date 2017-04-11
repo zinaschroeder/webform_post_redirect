@@ -54,7 +54,7 @@
       $included_components = array($redirect['included_components']);
     }
 
-    $form['#id']     = 'post_redirect_form';
+    $form['#id']     = 'webform_post_redirect_form';
     $form['#action'] = $redirect_url;
     $form['#method'] = 'POST';
 

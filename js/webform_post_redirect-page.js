@@ -3,12 +3,8 @@
  * Force submission of form on load to trigger POST redirect
  */
 
-jQuery(document).ready(function($){
-
-  function submit_form() {
-    document.getElementById('post_redirect_form').submit();
+Drupal.behaviors.webform_post_redirect_submit_form = {
+  attach: function (context, settings) {
+    $('form#webform_post_redirect_form').submit();
   }
-
-  window.onload = submit_form;
-
-});
+};
