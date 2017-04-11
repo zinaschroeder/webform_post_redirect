@@ -26,6 +26,8 @@
 
     if ($form_id == 'webform_configure_form') {
 
+      $defaults = webform_post_redirect_get_page_defaults();
+
       // Add script to hide or show POST redirect elements when they are not relevant
       drupal_add_js(drupal_get_path('module', 'webform_post_redirect')
           . '/js/webform_post_redirect-admin.js');
@@ -97,26 +99,29 @@
         '#collapsed' => TRUE,
       );
 
-
-      // Header text field
-      $form['submission']['redirection']['page_settings']['header'] = array(
+      // Page Title text field
+      $form['submission']['redirection']['page_settings']['page_title'] = array(
         '#type'          => 'textfield',
-        '#title'         => t('Header'),
-        '#default_value' => 'Redirecting',
+        '#title'         => t('Page title'),
+        '#default_value' => $redirect['page_title'],
+        '#description'   => t('The page title value for the redirect page. If left blank, the default title "!default" will be used.', array('!default' => t($defaults['page_title']))),
       );
 
       // Page text field
       $form['submission']['redirection']['page_settings']['message'] = array(
-        '#type'          => 'textarea',
+        '#type'          => 'text_format',
         '#title'         => t('Page Text'),
-        '#default_value' => 'If your browser does not automatically redirect you in 5 seconds, please click the button below.',
+        '#default_value' => $redirect['message'],
+        '#format'        => $redirect['message_format'],
+        '#description'   => t('A message to be displayed on the redirect page. If left blank, the message "!default" will be used.', array('!default' => t($defaults['message']))),
       );
 
       // Page text field
       $form['submission']['redirection']['page_settings']['button_text'] = array(
         '#type'          => 'textfield',
-        '#title'         => t('Redirect Button Text'),
-        '#default_value' => 'Redirect Now',
+        '#title'         => t('Redirect button label'),
+        '#default_value' => $redirect['button_text'],
+        '#description'   => t('The label for the manual redirect button on the redirect page. If left blank, the default label "!default" will be used.', array('!default' => t($defaults['button_text']))),
       );
 
       // Only allow users with permission to access these options
@@ -170,21 +175,29 @@
     // Get comma separated list of values from checkbox associative array
     $included_components = implode(', ', array_filter(array_values($form_state['values']['components'])));
 
+      // Create array for the database record
+      $fields = array(
+        'included_components' => $included_components,
+        'exclude_empty' => $form_state['values']['exclude_empty'],
+        'status'              => $form_state['values']['redirect_post'],
+        'multivalue_format'   => $form_state['values']['multivalue'],
+        'page_title'          => $form_state['values']['page_title'],
+        'message'             => $form_state['values']['message']['value'],
+        'message_format'      => $form_state['values']['message']['format'],
+        'button_text'         => $form_state['values']['button_text'],
+      );
+
     // Update or insert row depending on if one exists for this node already
     if (webform_post_redirect_check_record_exists($nid)) {
-      webform_post_redirect_update_components($nid, array('included_components' => $included_components));
+
+      webform_post_redirect_update_components($nid, $fields);
 
     } else {
 
-      // Create array for the database record
-      $fields = array(
-        'nid' => $nid,
-        'included_components' => $included_components,
-        'exclude_empty' => $form_state['values']['exclude_empty'],
-        'status' => $form_state['values']['redirect_post']
-      );
+      // Add node id to fields since this is a new record
+      $fields['nid'] = $nid;
 
-      webform_post_redirect_insert_components($nid, $fields);
+      webform_post_redirect_insert_components($fields);
     }
   }
 
@@ -204,7 +217,12 @@
         'nid' => NULL,
         'included_components' => array(),
         'exclude_empty' => NULL,
-        'status' => NULL
+        'status'              => NULL,
+        'multivalue_format'   => 'json',
+        'page_title'          => NULL,
+        'message'             => NULL,
+        'message_format'      => NULL,
+        'button_text'         => NULL,
       );
     }
 
@@ -364,10 +382,9 @@
   /**
    * This function creates a new post redirect record
    *
-   * @param int              $nid         ID of webform node
    * @param associate array  $components  Array of columns and values to insert
    */
-  function webform_post_redirect_insert_components($nid, $fields) {
+  function webform_post_redirect_insert_components($fields) {
     $success = db_insert('webform_post_redirects')
         ->fields($fields)
         ->execute();
@@ -429,11 +446,12 @@
 
     return array(
       'webform_post_redirect_page' => array(
-        'variables' => array('form' => NULL, 'header' => NULL, 'message' => NULL),
+        'variables' => array('form' => NULL, 'page_title' => NULL, 'message' => NULL),
         'template' => 'templates/webform-post-redirect-page',
       ),
     );
   }
+
   /*
    * Get array of default values for redirect page values
    */
