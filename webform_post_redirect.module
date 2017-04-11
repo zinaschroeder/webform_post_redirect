@@ -80,6 +80,15 @@
         '#default_value' => $redirect['exclude_empty'],
       );
 
+      // Multivalue field format option field
+      $form['submission']['redirection']['components']['suffix']['multivalue'] = array(
+        '#type'          => 'radios',
+        '#title'         => t('Multivalue Field Format'),
+        '#options'       => array('json' => t('JSON'), 'serialize' => t('PHP Serialization')),
+        '#default_value' => $redirect['multivalue_format'],
+        '#description'   => t('The POST string encoding format for fields that contain multiple values, such as checkboxes.'),
+      );
+
       // Redirect Page Settings fieldset
       $form['submission']['redirection']['page_settings'] = array(
         '#type' => 'fieldset',
@@ -88,13 +97,6 @@
         '#collapsed' => TRUE,
       );
 
-      // Multivalue field format option field
-      $form['submission']['redirection']['page_settings']['multivalue'] = array(
-        '#type'          => 'radios',
-        '#title'         => t('Multivalue Field Format'),
-        '#options'       => array('json' => t('JSON'), 'serialize' => t('PHP Serialization')),
-        '#default_value' => 'json',
-      );
 
       // Header text field
       $form['submission']['redirection']['page_settings']['header'] = array(
