@@ -18,7 +18,7 @@
     $page = array(
       '#theme'      => 'webform_post_redirect_page',
       '#page_title' => t(!empty($redirect['page_title']) ? $redirect['page_title'] : $defaults['page_title']),
-      '#message'    => t(!empty($redirect['message']) ? $redirect['message'] : $defaults['message']),
+      '#message'    => '<p>' . t(!empty($redirect['message']) ? $redirect['message'] : $defaults['message']) . '<p>',
       '#form'       => drupal_get_form('webform_post_redirect_hidden_form', $nid, $sid),
     );
 
