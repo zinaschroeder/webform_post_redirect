@@ -432,3 +432,14 @@
       ),
     );
   }
+  /*
+   * Get array of default values for redirect page values
+   */
+  function webform_post_redirect_get_page_defaults() {
+    return array(
+      'page_title'  => 'Redirecting',
+      'message'     => '<p>If your browser does not automatically redirect you in a few moments, please click the button below.</p>',
+      'button_text' => 'Redirect Now',
+    );
+  }
+
